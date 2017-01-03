@@ -1,0 +1,15 @@
+scene:sensor:film.name|type = film|ldrfilm
+
+scene:sensor:film:boolean.name|value = banner|false
+scene:sensor:film:string.name|value = label[10,10]|''
+
+scene:sensor:sampler:integer.name|value = sampleCount|20
+
+% emitter
+scene:emitter.type = 'envmap'
+scene:emitter:transform:matrix.value = 1 0 0 0, 0 1 0 0, 0 0 1 0, 0 0 0 1
+scene:emitter:transform:rotate.angle|y = 180|1
+
+
+scene:emitter:string.name|value = filename|(lightFile)
+

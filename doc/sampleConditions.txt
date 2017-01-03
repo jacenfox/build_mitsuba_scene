@@ -1,0 +1,6 @@
+imageName	lightFile	variable_abc
+BumpySphere_HDR+1		/gel/usr/hdr.hdr	1
+BumpySphere_HDR-1		/gel/usr/hdr.hdr	-1
+BumpySphere_LDR+1		/gel/usr/ldr.hdr	+1
+BumpySphere_LDR-1		/gel/usr/ldr.hdr	-1
+
