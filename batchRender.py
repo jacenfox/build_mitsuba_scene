@@ -76,11 +76,11 @@ if __name__ == '__main__':
         rs = pool.map_async(render, params, chunksize)
         pool.close()
 
+    start_time = time.time()
+    start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     while (True):
         if (rs.ready()):
             break
-        start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-        start_time = time.time()
         remaining = rs._number_left
         time_elapsed = time.time() - start_time
         time_left = time_elapsed * (remaining / float(NUM_COUNT_ALL - remaining))
