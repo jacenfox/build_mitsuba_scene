@@ -1,5 +1,7 @@
 import os
 import sys
+
+import argparse
 import time
 from os import listdir
 from multiprocessing import Pool
@@ -11,7 +13,7 @@ DEBUG = 0
 outputformat = 'anyFormat'
 
 
-def parseRenderCmds(PATH_xml, PATH_png, skipExist):
+def parseRenderCmds(PATH_xml, PATH_png, skipExist, mitsuba_arg):
     # PATH_xml = './'
     # PATH_png = '/gel/usr/jizha16/laval/results/'
     xmlfiles = [f for f in listdir(PATH_xml) if isfile(join(PATH_xml, f)) and f.endswith('.xml')]
@@ -24,7 +26,7 @@ def parseRenderCmds(PATH_xml, PATH_png, skipExist):
         if isfile(outfullfile) is True and skipExist is True:
             print('skip ' + outfullfile)
             continue
-        renderCmds.append("mitsuba -q -p 2 " + xmlfullfile + " -o " + outfullfile)
+        renderCmds.append("mitsuba -q " + mitsuba_arg + ' ' + xmlfullfile + " -o " + outfullfile)
     return renderCmds
 
 
@@ -43,24 +45,39 @@ def printHelp():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        printHelp()
-        exit()
-    PATH_xml = sys.argv[1]
-    PATH_img = sys.argv[2]
+    # if len(sys.argv) < 3:
+    #     printHelp()
+    #     exit()
+
+    parser = argparse.ArgumentParser(description='Batch render with mitsuba')
+
+    parser.add_argument('-i', '--input', help="input xml path", required=True)
+    parser.add_argument('-o', '--output', help="output image path", required=True)
+    parser.add_argument('-j', '--jobs', help="pool size", required=False)
+    parser.add_argument('-s', '--skip', help="skip exist, -sjpg[png,pfm] skip if .jpg[.png.pfm] exist", required=False)
+    parser.add_argument('-m', '--mitsuba_arg', help="mitsuba args", required=False)
+
+    args = parser.parse_args()
+
+    PATH_xml = args.input
+    PATH_img = args.output
+
     poolNum = 1
-    # print sys.argv, first one is the name of this script
-    if len(sys.argv) >= 4 and '-j' in sys.argv[3]:
-        poolNum = int(sys.argv[3][2:])
+    if args.jobs is not None:
+        poolNum = int(args.jobs)
         print('using pool ' + str(poolNum))
 
     skipExist = False
-    if len(sys.argv) >= 5 and '-s' in sys.argv[4]:
-        outputformat = sys.argv[4][2:]
+    if args.skip is not None:
+        outputformat = args.skip
         skipExist = True
         print('will skip the existing .' + outputformat)
 
-    renderCmds = parseRenderCmds(PATH_xml, PATH_img, skipExist)
+    mitsuba_arg = ''
+    if args.mitsuba_arg is not None:
+        mitsuba_arg = args.mitsuba_arg
+
+    renderCmds = parseRenderCmds(PATH_xml, PATH_img, skipExist, mitsuba_arg)
 
     params = renderCmds
     NUM_COUNT_ALL = len(params)
@@ -83,7 +100,7 @@ if __name__ == '__main__':
             break
         remaining = rs._number_left
         time_elapsed = time.time() - start_time
-        time_left = time_elapsed * (remaining / float(NUM_COUNT_ALL - remaining))
+        time_left = float(time_elapsed) * (remaining / float(NUM_COUNT_ALL - remaining))
         m_elapsed, s_elapsed = divmod(time_elapsed, 60)
         h_elapsed, m_elapsed = divmod(m_elapsed, 60)
         m_left, s_left = divmod(time_left, 60)
