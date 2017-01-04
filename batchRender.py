@@ -79,11 +79,19 @@ if __name__ == '__main__':
     while (True):
         if (rs.ready()):
             break
+        start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        start_time = time.time()
         remaining = rs._number_left
         time_elapsed = time.time() - start_time
-        time_left = time_elapsed * (remaining / (int(NUM_COUNT_ALL) - remaining))
-        print("Task %d\\%d.\tTime start %.2f\telapsed%.2f\tleft%.2f\n" %
-              (remaining * chunksize, int(NUM_COUNT_ALL + 1), start_time, time_elapsed, time_left))
+        time_left = time_elapsed * (remaining / float(NUM_COUNT_ALL - remaining))
+        m_elapsed, s_elapsed = divmod(time_elapsed, 60)
+        h_elapsed, m_elapsed = divmod(m_elapsed, 60)
+        m_left, s_left = divmod(time_left, 60)
+        h_left, m_left = divmod(m_left, 60)
+
+        print("Task %d\\%d.\tTime start: %s\telapsed: %d:%02d:%02d\tleft: %d:%02d:%02d\n" %
+              (remaining * chunksize, int(NUM_COUNT_ALL + 1), start_time_str,
+               h_elapsed, m_elapsed, s_elapsed, h_left, m_left, s_left))
         time.sleep(10)
 
     print(str(NUM_COUNT_ALL) + ' scenes done!')
