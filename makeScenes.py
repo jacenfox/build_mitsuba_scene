@@ -287,7 +287,6 @@ if __name__ == '__main__':
 
         outputXMLs.append(outputXML)
 
-    exit()
     SCENE_MAPs = [item for item in SCENE_MAPs if item != 'del']
 
     params = zip(outputXMLs, SCENE_MAPs)
@@ -306,7 +305,7 @@ if __name__ == '__main__':
         if (rs.ready()):
             break
         remaining = rs._number_left
-        print("\nWaiting for", remaining, "tasks to complete in %d\n" % (int(NUM_COUNT_ALL / chunksize + 1)))
-        time.sleep(5)
+        print("Waiting for %d tasks to complete in %d\n" % (remaining, int(NUM_COUNT_ALL / chunksize + 1)))
+        time.sleep(10)
 
     print(str(NUM_COUNT_ALL) + ' scenes done!')
