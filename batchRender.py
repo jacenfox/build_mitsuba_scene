@@ -1,11 +1,9 @@
 import os
-import sys
-
 import argparse
 import time
 from os import listdir
 from multiprocessing import Pool
-from os.path import isfile, join
+from os.path import isfile, isdir, join
 
 global DEBUG
 global outputformat
@@ -55,12 +53,16 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help="output image path", required=True)
     parser.add_argument('-j', '--jobs', help="pool size", required=False)
     parser.add_argument('-s', '--skip', help="skip exist, -sjpg[png,pfm] skip if .jpg[.png.pfm] exist", required=False)
-    parser.add_argument('-m', '--mitsuba_arg', help="mitsuba args", required=False)
+    parser.add_argument('-m', '--mitsuba_arg', help="mitsuba args, '-p 2 -a scene_path'", required=False)
 
     args = parser.parse_args()
 
     PATH_xml = args.input
     PATH_img = args.output
+
+    if isdir(PATH_img) is False:
+        print('no such output dir: %s' % (PATH_img))
+        exit()
 
     poolNum = 1
     if args.jobs is not None:

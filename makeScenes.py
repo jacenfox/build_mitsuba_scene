@@ -1,14 +1,15 @@
-from astropy.io import ascii
-from xml.dom import minidom
-from multiprocessing import Pool
-from os.path import join
+import argparse
 import sys
 import time
 import re
+from multiprocessing import Pool
+from os.path import isfile, isdir, join
 import copy
-# from makeScene import makeScene
+from astropy.io import ascii
+from xml.dom import minidom
+
 # Issue:
-# TODO: done, sensor label cannot hide
+# TODO:
 global xmldoc_global
 global DEBUG
 DEBUG = 0
@@ -134,8 +135,8 @@ def reachtoLeafNode(rootNode, childNodeNames):
                     nodeType = 'parent'
                     return parentNodes, nodeType
                 else:
-                    print 'Couldn''t reach to the leaf Node, create mapping in order'
-                    print childNodeNames
+                    print('Couldn''t reach to the leaf Node, create mapping in order')
+                    print(childNodeNames)
                     sys.exit('in reachtoLeafNode')   # err
     nodeType = 'leaf'
     return parentNodes, nodeType
@@ -176,8 +177,8 @@ def modifyElement(elementItem, attribute_names, attribute_values):
         for i_att in range(0, len(attribute_names)):
             elementItem.setAttribute(attribute_names[i_att], attribute_values[i_att])
     except:
-        print 'cannot modify element '
-        return ''
+        print('cannot modify element ')
+        return('')
     return elementItem
 
 
@@ -194,8 +195,8 @@ def addElement(item_parent, element_name, attribute_names, attribute_values):
         #     item.setAttribute(attribute_names[i_att], attribute_values[i_att])
         item_parent.appendChild(item)  # append new child, return new child
     except:
-        print 'cannot create element: '
-        print element_name
+        print('cannot create element: ')
+        print(element_name)
         return ''  # error
     return item_parent
 
@@ -212,10 +213,10 @@ def makeScenes(params):
             try:
                 xmldoc = makeScene(xmldoc, elements[i_s], attributes[i_s], values[i_s])
             except:
-                print 'makeScene error\nelements: attributes: values'
-                print elements[i_s]
-                print attributes[i_s]
-                print values[i_s]
+                print('makeScene error\nelements: attributes: values')
+                print(elements[i_s])
+                print(attributes[i_s])
+                print(values[i_s])
                 break
         # write back the xml
         xmldocHandle = open(outputXML, 'w')
@@ -223,41 +224,71 @@ def makeScenes(params):
         xmldocHandle.close()
 
     except:
-        print 'make scene ' + outputXML + ' failed'
+        print('make scene ' + outputXML + ' failed')
+
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        helpmsg = 'usage:\n\tpython makeScenes.py *original_scene*.xml '\
-                  '*mappingFile*.txt ' '*conditionsFile*.txt ' \
-                  'output_path -j4\n\t-j4 pool size 4'
-        print helpmsg
+    parser = argparse.ArgumentParser(description='Generate mitsuba scene files')
+
+    parser.add_argument('-i', '--inputXML', help="*original scene file*.xml", required=True)
+    parser.add_argument('-m', '--mappingFile', help="*mappingFile*.txt", required=True)
+    parser.add_argument('-c', '--conditionFile', help="*conditionFile*.txt", required=True)
+    parser.add_argument('-o', '--outputPath', help="output path for the xml files", required=True)
+    parser.add_argument('-j', '--jobs', help="pool size", required=False)
+    parser.add_argument('-s', '--skip', help="if 1, skip exist, if 0, replace", required=False)
+    args = parser.parse_args()
+
+    inputXML = args.inputXML
+    mappingFile = args.mappingFile
+    conditionFile = args.conditionFile
+    output_path = args.outputPath
+
+    if isdir(output_path) is False:
+        print('no such output dir: %s' % (output_path))
         exit()
 
-    inputXML = sys.argv[1]
-    mappingFile = sys.argv[2]
-    conditionFile = sys.argv[3]
-    output_path = sys.argv[4]
+    poolNum = 1
+    if args.jobs is not None:
+        poolNum = int(args.jobs)
+        print('using pool ' + str(poolNum))
 
-    if len(sys.argv) == 6 and '-j' in sys.argv[5]:
-        poolNum = int(sys.argv[5][2:])
-        print 'using pool ' + str(poolNum)
-    else:
-        poolNum = 1
+    skipExist = False
+    if args.skip is not None:
+        skip01 = args.skip
+        if skip01 == '1':
+            skipExist = True
+        elif skip01 == '0':
+            skipExist = False
+        else:
+            print('-s only supports 0 or 1')
+            exit()
+        print('will skip the existing scene files.')
 
     xmldoc_global = minidom.parse(inputXML)
+
     try:
+        print('parsing Condition File')
         names, values = parseConditionFile(conditionFile)
     except:
-        print 'error: read ConditionFile: ' + conditionFile
-        sys.exit()
+        print('error: read ConditionFile: ' + conditionFile)
+        exit()
 
     elements, attributes, rights = parseMappingFile(mappingFile)
     SCENE_MAPs = connectConditionMapping(names, values, elements, attributes, rights)
 
     outputXMLs = []
+    existing_list = []
     for i in range(0, len(values)):
         outputXML = join(output_path, str(values[i]['imageName']) + '.xml')
+        if isfile(outputXML) is True and skipExist is True:
+            print('skip ' + outputXML)
+            SCENE_MAPs[i] = 'del'
+            continue
+
         outputXMLs.append(outputXML)
+
+    exit()
+    SCENE_MAPs = [item for item in SCENE_MAPs if item != 'del']
 
     params = zip(outputXMLs, SCENE_MAPs)
     NUM_COUNT_ALL = len(params)
@@ -275,7 +306,7 @@ if __name__ == '__main__':
         if (rs.ready()):
             break
         remaining = rs._number_left
-        print "\nWaiting for", remaining, "tasks to complete in %d\n" % (int(NUM_COUNT_ALL / chunksize + 1))
+        print("\nWaiting for", remaining, "tasks to complete in %d\n" % (int(NUM_COUNT_ALL / chunksize + 1)))
         time.sleep(5)
 
-    print str(NUM_COUNT_ALL) + ' scenes done!'
+    print(str(NUM_COUNT_ALL) + ' scenes done!')
