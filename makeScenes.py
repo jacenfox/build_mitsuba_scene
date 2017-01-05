@@ -257,12 +257,13 @@ if __name__ == '__main__':
         skip01 = args.skip
         if skip01 == '1':
             skipExist = True
+            print('will skip the existing scene files.')
         elif skip01 == '0':
             skipExist = False
+            print('will replace the existing scene files.')
         else:
             print('-s only supports 0 or 1')
             exit()
-        print('will skip the existing scene files.')
 
     xmldoc_global = minidom.parse(inputXML)
 
@@ -301,11 +302,23 @@ if __name__ == '__main__':
         rs = pool.map_async(makeScenes, params, chunksize)
         pool.close()
 
+    start_time = time.time()
+    start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     while (True):
         if (rs.ready()):
             break
         remaining = rs._number_left
-        print("Waiting for %d tasks to complete in %d\n" % (remaining, int(NUM_COUNT_ALL / chunksize + 1)))
+
+        time_elapsed = time.time() - start_time
+        time_left = float(time_elapsed) * (remaining / float(NUM_COUNT_ALL + 1 - remaining))
+        m_elapsed, s_elapsed = divmod(time_elapsed, 60)
+        h_elapsed, m_elapsed = divmod(m_elapsed, 60)
+        m_left, s_left = divmod(time_left, 60)
+        h_left, m_left = divmod(m_left, 60)
+
+        print("Task %d\\%d.\tTime start: %s\telapsed: %d:%02d:%02d\tleft: %d:%02d:%02d\n" %
+              (remaining * chunksize, int(NUM_COUNT_ALL + 1), start_time_str,
+               h_elapsed, m_elapsed, s_elapsed, h_left, m_left, s_left))
         time.sleep(10)
 
     print(str(NUM_COUNT_ALL) + ' scenes done!')

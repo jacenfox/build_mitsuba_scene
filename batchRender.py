@@ -102,7 +102,7 @@ if __name__ == '__main__':
             break
         remaining = rs._number_left
         time_elapsed = time.time() - start_time
-        time_left = float(time_elapsed) * (remaining / float(NUM_COUNT_ALL - remaining))
+        time_left = float(time_elapsed) * (remaining / float(NUM_COUNT_ALL + 1 - remaining))
         m_elapsed, s_elapsed = divmod(time_elapsed, 60)
         h_elapsed, m_elapsed = divmod(m_elapsed, 60)
         m_left, s_left = divmod(time_left, 60)
