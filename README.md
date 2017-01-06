@@ -12,14 +12,14 @@ Blender:
 |  /  
 |/  
 -----------> x  
-Unity:
-^y    ^	(z)
+Unity(Left handed):
+^y    ^	z
 |    /
 |  / 	
 |/
------------> x
-Mitsuba:
-^y    ^	(-z)
+-----------> -x
+Mitsuba(Right handed):
+^y    ^	z
 |    /
 |  / 	
 |/
