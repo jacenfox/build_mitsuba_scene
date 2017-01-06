@@ -110,7 +110,7 @@ if __name__ == '__main__':
         h_left, m_left = divmod(m_left, 60)
 
         print("Task %d\\%d.\tTime start: %s\telapsed: %d:%02d:%02d\tleft: %d:%02d:%02d\n" %
-              (remaining * chunksize, int(NUM_COUNT_ALL + 1), start_time_str,
+              (max(NUM_COUNT_ALL, remaining * chunksize), int(NUM_COUNT_ALL + 1), start_time_str,
                h_elapsed, m_elapsed, s_elapsed, h_left, m_left, s_left))
         time.sleep(10)
 
