@@ -45,24 +45,24 @@ class MitsubaBatchRender():
 
     # Function to add the range sensor to the scene
     @abc.abstractmethod
-    def modifyScene(self, scene, paras):
-        # newScene = scene
-        newScene = Scene(scene)
-        newScene.setDestinationFile(destination)
+    def genNewScene(self, paras):
+        cameraOrigin, cameraTarget, emitterFname, emitterScale, emitterRotate = paras
+
+        newScene = Scene(self.scene)
+
         pmgr = PluginManager.getInstance()
         sensor = pmgr.create({'type': 'spherical',
-                              'toWorld': Transform.lookAt(Point(0, i * 5, 1), Point(0, i * 5, i * 5), Vector(0, 1, 0)),
+                              'toWorld': Transform.lookAt(Point(cameraOrigin[0], cameraOrigin[0], cameraOrigin[2]),
+                                                          Point(cameraTarget[0], cameraTarget[1], cameraTarget[2]), Vector(0, 1, 0)),
                               'film': {'type': 'ldrfilm', 'fileFormat': 'png', 'width': 512, 'height': 256},
                               'sampler': {'type': 'ldsampler', 'sampleCount': 32},
                               })
-        # newScene.addSensor(sensor)
         newScene.setSensor(sensor)
-        fname_envmap = '/gel/usr/jizha16/laval/data/3Dmodels/render_models_with_ldr2hdr/140305/hdr.exr'
 
         emitter = pmgr.create({'type': "envmap",
-                               "filename": fname_envmap,
-                               "scale": 1.0,
-                               "toWorld": Transform.rotate(Vector(0, 1, 0), 0.0)
+                               "filename": emitterFname,
+                               "scale": float(emitterScale),
+                               "toWorld": Transform.rotate(Vector(0, 1, 0), float(emitterRotate))
                                })
         # emitter.configure()
         newScene.addChild('emitter', emitter)
@@ -76,9 +76,15 @@ def main():
     mbr = MitsubaBatchRender()
     mbr.loadScene("/home-local2/jizha16.extra.nobkp/data/3Dmodels/render_models_with_ldr2hdr/bunny.xml")
     for i in range(0, 3):
+        cameraOrigin = [0, 1, 0]
+        cameraTarget = [0, 1, 1]
+        emitterFname = '/gel/usr/jizha16/laval/data/ldr2hdr/sunAligned256_2014/20140924174631.exr'
+        emitterScale = 2
+        emitterRotate = 0
+        paras = (cameraOrigin, cameraTarget, emitterFname, emitterScale, emitterRotate)
+        newScene = mbr.genNewScene(paras)
         destination = 'scene_' + str(i)
-        print(destination)
-        newScene = mbr.modifyScene(newScene, i)
+        newScene.setDestinationFile(destination)
         mbr.render(newScene)
 
 
