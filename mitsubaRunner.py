@@ -1,44 +1,53 @@
-from mitsuba.core import *
-from mitsuba.render import Scene
-from mitsuba.render import SceneHandler
+from MitsubaRender import MitsubaRender
+from MitsubaConditionParser import ConditionParser
 
-from mitsuba.render import RenderQueue, RenderJob
-import multiprocessing
-print('start')
 
-fileResolver = Thread.getThread().getFileResolver()
-fileResolver.appendPath('scene_251')
-# load scene to memory
-scene = SceneHandler.loadScene(fileResolver.resolve("/home-local2/jizha16.extra.nobkp/data/3Dmodels/render_models_with_ldr2hdr/bunny.xml"))
+class MBR(MitsubaRender):
 
-pmgr = PluginManager.getInstance()
+    def genNewScene(self, paras):
+        cameraOrigin = paras['cameraOrigin']
+        cameraTarget = paras['cameraTarget']
+        emitterFname = paras['emitterFname']
+        emitterScale = paras['emitterScale']
+        emitterRotate = paras['emitterRotate']
 
-scheduler = Scheduler.getInstance()
-for i in range(0, multiprocessing.cpu_count()):
-    scheduler.registerWorker(LocalWorker(i, 'wrk%i' % i))
-scheduler.start()
-sceneResID = scheduler.registerResource(scene)
+        newScene = Scene(self.scene)
 
-queue = RenderQueue()
-print('starting')
-for i in range(2):
-    # render different scenes
-    destination = 'scene%02d' % i
-    print(destination)
-    newScene = Scene(scene)
-    # sensor = pmgr.create({'type': 'spherical',
-    #                       'toWorld': Transform.lookAt(Point(0, i, 1), Point(0, i, 0), Vector(0, 1, 0)),
-    #                       'film': {'type': 'ldrfilm', 'width': 512, 'height': 256}
-    #                       })
-    # newScene.addChild(sensor)
-    newScene.configure()
-    newScene.initialize()
-    print('rendering')
-    newScene.setDestinationFile(destination)
-    print('rendering job')
-    job = RenderJob('test', newScene, queue, sceneResID)
-    print('rendering start')
-    job.start()
-    print('rendering done')
-    import time
-    time.sleep(3)
+        pmgr = PluginManager.getInstance()
+        sensor = pmgr.create({'type': 'spherical',
+                              'toWorld': Transform.lookAt(Point(cameraOrigin[0], cameraOrigin[0], cameraOrigin[2]),
+                                                          Point(cameraTarget[0], cameraTarget[1], cameraTarget[2]), Vector(0, 1, 0)),
+                              'film': {'type': 'ldrfilm', 'fileFormat': 'png', 'width': 512, 'height': 256},
+                              'sampler': {'type': 'ldsampler', 'sampleCount': 32},
+                              })
+        newScene.setSensor(sensor)
+
+        emitter = pmgr.create({'type': "envmap",
+                               "filename": emitterFname,
+                               "scale": float(emitterScale),
+                               "toWorld": Transform.rotate(Vector(0, 1, 0), float(emitterRotate))
+                               })
+        # emitter.configure()
+        newScene.addChild('emitter', emitter)
+        newScene.configure()
+        newScene.initialize()  # init envmap BSphere
+        # print newScene
+        return newScene
+
+
+def main():
+    mcp = ConditionParser()
+    mcp.load('/home-local/jizha16.extra.nobkp/data/3Dmodels/urban/condTest.txt')
+
+    mbr = MBR()
+    mbr.setLogger('EWarn')
+    mbr.loadScene("/home-local2/jizha16.extra.nobkp/data/3Dmodels/render_models_with_ldr2hdr/bunny.xml")
+
+    for condition in mcp.conditions[0:5:
+        newScene = mbr.genNewScene(conditions)
+        destination = 'scene_' + condition['imageName']
+        newScene.setDestinationFile(destination)
+        mbr.render(newScene)
+
+if __name__ == '__main__':
+    main()
