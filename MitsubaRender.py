@@ -9,7 +9,7 @@ import multiprocessing
 import abc
 
 
-class MitsubaBatchRender():
+class MitsubaRender():
 
     def __init__(self):
         self.scene = None
@@ -73,7 +73,7 @@ class MitsubaBatchRender():
 
 
 def main():
-    mbr = MitsubaBatchRender()
+    mbr = MitsubaRender()
     mbr.loadScene("/home-local2/jizha16.extra.nobkp/data/3Dmodels/render_models_with_ldr2hdr/bunny.xml")
     for i in range(0, 3):
         cameraOrigin = [0, 1, 0]
