@@ -41,36 +41,59 @@ Mitsuba envmap coordiantes, used to warp to sphere
 |						|-Z
 |						|
 |-----------------------|-Y
-TODO:update this
-They may warp in different way, neet to rotate emitter <rotate angle="180" y="1"/></transform>
+They may warp in different way, need to rotate emitter <rotate angle="180" y="1"/></transform>
 </pre>
 
 --------------
 Usage:
 --------------
-1. Model scene in Blender  
-	* export as mitsuba scene file (need mitsuba add-ons for Blender)  
+1. Model scene in Blender
+	* export as mitsuba scene file  
 	* save as *scene*.xml  
 
     All the scene parameters are in *scene*.xml  
 	
 2. Generate new mitsuba scene files:   
 	use the mapping and condition file:  
-		`python makeScenes.py *scene*.xml *mapping*.txt *conditions*.txt *PATH_out_xmls*`  
+		`python makeScenes.py -i *scene*.xml -m *mapping*.txt -c *conditions*.txt -o *PATH_out_xmls*`  
 
 	or directly change the parameters in *scene*.xml file.
 	
-	this will generate a bunch of scenes with the condition file, very useful for rendering with different parameters.  
+	this will generate a bunch of scenes with the condition file, useful for rendering with different parameters.  
 	*PATH_out_xmls* contains the new scene .xml file for mitsuba render.  
 	 
 3. Render the scene:  
 		`mitsuba *outputScene* -o ldr.png`  
 
     or use the batch render:  
-		`python batchRender.py *PATH_out_xmls* *PATH_output_render_result*`  
+		`python batchRender.py -i *PATH_out_xmls* -o *PATH_output_render_result*`  
 
+* Or render with MitsubaRender
+	The scene file should be adjusted before rendering.
+	todo with the new Demo.xml
+For example,
+``` 
+	1. Integrator should be set up in the .xml
+	<integrator type="volpath"> 
+		<integer name="maxDepth" value="-1"/>
+		<integer name="rrDepth" value="5"/>
+		<boolean name="strictNormals" value="false"/>
+	</integrator>
+	<integrator type="direct"> 
+		<integer name="shadingSamples" value="1"/>
+		<boolean name="strictNormals" value="false"/>
+	</integrator>
+	
+	2. Add an emitter node, or else, mitsuba API will create an "sky-sun" emitter
+	<emitter type="spot">
+	    <transform name="toWorld">
+	      <lookat origin= "0, -1, 0" target="0, -2, 0"/></transform>
+	<float name="samplingWeight" value="0.1"/></emitter>
+	
+	3. Remove envmap, if exist.
 
-
+	4. The sensor, film and sampler will be overwritten
+```
 --------------
 SAMPLE CONDITION FILE
 --------------
