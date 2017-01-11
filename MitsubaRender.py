@@ -11,33 +11,45 @@ import abc
 
 class MitsubaRender():
 
-    def __init__(self):
+    def __init__(self, cpus=0, logLevel='warn'):
         self.scene = None
-        self.setLogger()
+
+        if cpus == 0:
+            cpus = multiprocessing.cpu_count()
+        self.cpus = min(cpus, multiprocessing.cpu_count())
+
+        self.setLogger(logLevel)
         self.setScheduler()
         self.queue = RenderQueue()
         pass
 
-    def setLogger(self):
+    def setLogger(self, logLevel):
         logger = mitsuba.core.Thread.getThread().getLogger()
-        logger.setLogLevel(EWarn)  # EWarn, EError, EInfo, EDebug,
+        Logs = {
+            'warn': EWarn,
+            'error': EError,
+            'info': EInfo,
+            'debug': EDebug
+        }
+
+        logger.setLogLevel(Logs[logLevel])  # EWarn, EError, EInfo, EDebug,
 
     def setScheduler(self):
         scheduler = Scheduler.getInstance()
-        for i in range(0, multiprocessing.cpu_count() / 3):  # half power
+        for i in range(0, self.cpus):  # half power
             scheduler.registerWorker(LocalWorker(i, 'wrk%i' % i))
         scheduler.start()
 
-    def loadScene(self, fnameXML, addPath='./'):
+    def loadScene(self, fnameXML, scenePath='./'):
         # load .xml
         fileResolver = Thread.getThread().getFileResolver()
-        fileResolver.appendPath(addPath)
+        fileResolver.appendPath(scenePath)
         print('Loading Scene')
         self.scene = SceneHandler.loadScene(fileResolver.resolve(fnameXML))
         print('Scene Loaded')
 
     def render(self, scene):
-        print('starting RenderJob')
+        # print('\nstarting RenderJob')
         job = RenderJob('myRenderJob', scene, self.queue)  # shouldn't use sceneResID
         job.start()
         self.queue.waitLeft(0)
