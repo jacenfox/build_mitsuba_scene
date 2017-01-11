@@ -86,11 +86,11 @@ class MitsubaRender():
 
 def main():
     mbr = MitsubaRender()
-    mbr.loadScene("/home-local2/jizha16.extra.nobkp/data/3Dmodels/render_models_with_ldr2hdr/bunny.xml")
+    mbr.loadScene("bunny.xml")
     for i in range(0, 3):
         cameraOrigin = [0, 1, 0]
         cameraTarget = [0, 1, 1]
-        emitterFname = '/gel/usr/jizha16/laval/data/ldr2hdr/sunAligned256_2014/20140924174631.exr'
+        emitterFname = '174631.exr'
         emitterScale = 2
         emitterRotate = 0
         paras = (cameraOrigin, cameraTarget, emitterFname, emitterScale, emitterRotate)
