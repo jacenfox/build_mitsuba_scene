@@ -3,7 +3,6 @@ from MitsubaConditionParser import ConditionParser
 import argparse
 import os
 import time
-import math
 
 from mitsuba.core import *
 from mitsuba.render import *
@@ -20,11 +19,11 @@ class MBR(MitsubaRender):
 
         # will replace the whole sensor
         SENSOR_TYPE = 'spherical'
-        FILM_TYPE = 'ldrfilm'  # hdr
-        FILM_FILE_FORMAT = 'png'
+        FILM_TYPE = 'hdrfilm'  # hdrfilm, ldrfilm
+        FILM_FILE_FORMAT = 'pfm'  # pfm
         FILM_WIDTH = 512
         FILM_HEIGHT = 256
-        SAMPLER_SAMPLE_COUNT = 64
+        SAMPLER_SAMPLE_COUNT = 256
         newScene = Scene(self.scene)
 
         pmgr = PluginManager.getInstance()
@@ -56,7 +55,7 @@ def main(inputXML, conditionFile, outputPath, poolNum, skipExist, scenePATH):
     mcp = ConditionParser()
     mcp.load(conditionFile)
 
-    mbr = MBR(logLevel='error', cpus=3)
+    mbr = MBR(logLevel='error', cpus=poolNum)
 
     start_time = time.time()
     mbr.loadScene(inputXML, scenePath=scenePATH)
@@ -68,7 +67,8 @@ def main(inputXML, conditionFile, outputPath, poolNum, skipExist, scenePATH):
 
     # TODO: loop all
     loggerFile = open('mitsuba_logger.log', 'a')
-    conditions = mcp.conditions[0:15]
+    loggerFile.write('Start at: %s\n' % (start_time_str))
+    conditions = mcp.conditions
 
     for idx, condition in enumerate(conditions):
         # test if render exist
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         print('no such output dir: %s' % (outputPath))
         exit()
 
-    poolNum = 1
+    poolNum = -1
     if args.jobs is not None:
         poolNum = int(args.jobs)
         print('using pool ' + str(poolNum))
