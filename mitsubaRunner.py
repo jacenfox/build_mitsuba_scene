@@ -55,7 +55,7 @@ def main(inputXML, conditionFile, outputPath, poolNum, skipExist, scenePATH):
     mcp = ConditionParser()
     mcp.load(conditionFile)
 
-    mbr = MBR(logLevel='error', cpus=3)
+    mbr = MBR(logLevel='error', cpus=poolNum)
 
     start_time = time.time()
     mbr.loadScene(inputXML, scenePath=scenePATH)
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         print('no such output dir: %s' % (outputPath))
         exit()
 
-    poolNum = 1
+    poolNum = -1
     if args.jobs is not None:
         poolNum = int(args.jobs)
         print('using pool ' + str(poolNum))
