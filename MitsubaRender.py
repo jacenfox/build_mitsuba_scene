@@ -14,7 +14,7 @@ class MitsubaRender():
     def __init__(self, cpus=0, logLevel='warn'):
         self.scene = None
 
-        if cpus == 0:
+        if cpus <= 0:
             cpus = multiprocessing.cpu_count()
         self.cpus = min(cpus, multiprocessing.cpu_count())
 
@@ -85,12 +85,12 @@ class MitsubaRender():
 
 
 def main():
-    mbr = MitsubaRender()
-    mbr.loadScene("bunny.xml")
-    for i in range(0, 3):
+    mbr = MitsubaRender(cpus=6)
+    mbr.loadScene("/gel/usr/jizha16/laval/data/3Dmodels/render_models_with_ldr2hdr/bunny.xml")
+    for i in range(0, 50):
         cameraOrigin = [0, 1, 0]
         cameraTarget = [0, 1, 1]
-        emitterFname = '174631.exr'
+        emitterFname = '/gel/usr/jizha16/laval/data/3Dmodels/render_models_with_ldr2hdr/140305/hdr.exr'
         emitterScale = 2
         emitterRotate = 0
         paras = (cameraOrigin, cameraTarget, emitterFname, emitterScale, emitterRotate)
@@ -98,7 +98,6 @@ def main():
         destination = 'scene_' + str(i)
         newScene.setDestinationFile(destination)
         mbr.render(newScene)
-
 
 if __name__ == '__main__':
     main()
