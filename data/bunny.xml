@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- # Main Scene File -->
+<scene version="0.5.0">
+	<integrator type="direct" name="integrator">
+		<integer name="bsdfSamples" value="1"/>
+		<integer name="emitterSamples" value="1"/>
+		<boolean name="strictNormals" value="false"/>
+		<boolean name="hideEmitters" value="false"/>
+	</integrator>
+	<sensor type="spherical" id="Camera-camera">
+		<float name="farClip" value="100.000000"/>
+		<sampler type="ldsampler" name="sampler">
+			<integer name="sampleCount" value="128"/>
+		</sampler>
+		<film type="hdrfilm" name="film">
+			<boolean name="banner" value="true"/>
+			<float name="pixelAspectX" value="1.000000"/>
+			<string name="fileFormat" value="pfm"/>
+			<rfilter type="gaussian" name="rfilter">
+				<float name="stddev" value="0.500000"/>
+			</rfilter>
+			<integer name="width" value="2000"/>
+			<integer name="height" value="1000"/>
+			<float name="exposure" value="0.000000"/>
+			<string name="label[-10,-10]" value=""/>
+			<float name="shiftX" value="0.000000"/>
+			<boolean name="fitHorizontal" value="true"/>
+			<boolean name="highQualityEdges" value="false"/>
+			<float name="shiftY" value="0.000000"/>
+			<float name="pixelAspectY" value="1.000000"/>
+			<string name="pixelFormat" value="rgb"/>
+			<string name="tonemapMethod" value="gamma"/>
+			<float name="gamma" value="-1.000000"/>
+		</film>
+		<transform name="toWorld">
+			<lookat origin="0.000000, 0.000000, -0.000000" up="0.000000, 1.000000, 0.000000" target="-0.000000, -0.000000, 1.000000"/>
+		</transform>
+		<float name="nearClip" value="0.100000"/>
+	</sensor>
+	<bsdf type="diffuse" id="diffuse.003-bl_mat-bsdf">
+		<rgb name="reflectance" value="0.288298 0.288298 0.288298"/>
+	</bsdf>
+	<shape type="serialized" id="bunny.003_bunny.003_0000_m000_0.000000">
+		<transform name="toWorld">
+			<matrix value="1.962585 0.000000 0.385044 8.443063 0.000000 2.000000 -0.000000 -5.115613 -0.385044 0.000000 1.962585 13.234327 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="diffuse.003-bl_mat-bsdf" name="bsdf"/>
+		<string name="filename" value="/gel/usr/jizha16/laval/data/3Dmodel/models/bunny/Scene/00001/bunny_003_0000_m000_0_000000.serialized"/>
+	</shape>
+<emitter type="envmap">
+    <transform name="toWorld">
+      <matrix value="1 0 0 0, 0 1 0 0, 0 0 1 0, 0 0 0 1"/>
+    <rotate angle="0" y="1"/></transform>
+    <rgb name="irradiance" value="1.000000 1.000000 1.000000"/>
+  <float name="scale" value="1"/><string name="filename" value="/gel/usr/jizha16/laval/data/3Dmodel/models/140305/ldr_linear.jpg"/></emitter>
+	<bsdf type="diffuse" id="diffuse_ground.003-bl_mat-bsdf">
+		<rgb name="reflectance" value="0.114435 0.097587 0.082283"/>
+	</bsdf>
+	<shape type="serialized" id="Plane.003_Plane.003_0000_m000_0.000000">
+		<transform name="toWorld">
+			<matrix value="7.000000 0.000000 0.000000 12.565207 0.000000 0.000000 11.000000 -6.645764 0.000000 -14.150000 0.000000 3.963688 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="diffuse_ground.003-bl_mat-bsdf" name="bsdf"/>
+		<string name="filename" value="/gel/usr/jizha16/laval/data/3Dmodel/models/bunny/Scene/00001/Plane_003_0000_m000_0_000000.serialized"/>
+	</shape>
+</scene>
