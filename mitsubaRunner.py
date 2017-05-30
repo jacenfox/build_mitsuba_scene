@@ -32,7 +32,7 @@ class MBR(MitsubaRender):
                                                           Point(cameraTarget[0], cameraTarget[1], cameraTarget[2]), Vector(0, 1, 0)),
                               'film': {'type': FILM_TYPE, 'fileFormat': FILM_FILE_FORMAT,
                                        'width': FILM_WIDTH, 'height': FILM_HEIGHT, 'banner': False, 'componentFormat': 'float32',
-                                       'rfilter': {'type': 'tent', 'radius': 1.0}},
+                                      }, # 'rfilter': {'type': 'tent', 'radius': 1.0}},
                               'sampler': {'type': 'ldsampler', 'sampleCount': SAMPLER_SAMPLE_COUNT},
                               })
 
@@ -72,8 +72,9 @@ def main(inputXML, conditionFile, outputPath, poolNum, skipExist, scenePATH):
 
     for idx, condition in enumerate(conditions):
         # test if render exist
-        destination = os.path.join(outputPath, condition['imageName'])
+        destination = os.path.join(outputPath, condition['imageName'] + '.pfm')
         if os.path.isfile(destination) is True and skipExist is True:
+            print('.')
             continue
 
         # render
