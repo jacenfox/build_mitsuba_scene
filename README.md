@@ -23,7 +23,7 @@ Mitsuba(Right handed):
 |    /
 |  / 	
 |/
------------> x
+-----------> -x
 </pre>
 Our envmap input should be:  
 <pre>
